@@ -2,6 +2,9 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Presensi Kelas - QR Code</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
@@ -51,7 +54,6 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* Floating orbs background */
         .orb {
             position: fixed;
             border-radius: 50%;
@@ -84,7 +86,6 @@
             z-index: 1;
         }
 
-        /* Header */
         .header-top {
             display: flex;
             justify-content: space-between;
@@ -150,7 +151,6 @@
         }
         .subtitle { color: var(--text-muted); font-size: 13px; text-align: center; margin-bottom: 16px; }
 
-        /* Stats */
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
@@ -196,7 +196,6 @@
             font-weight: 600;
         }
 
-        /* Progress bar */
         .progress-container {
             margin-bottom: 16px;
         }
@@ -238,7 +237,6 @@
             100% { transform: translateX(100%); }
         }
 
-        /* QR wrapper */
         .qr-wrapper {
             background: white;
             border-radius: 18px;
@@ -273,7 +271,6 @@
             position: relative; z-index: 1;
         }
 
-        /* Buttons */
         .btn-group { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
         .btn {
             padding: 10px 16px; border: none; border-radius: 12px; font-weight: 600; font-size: 12px;
@@ -308,7 +305,6 @@
         }
         .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--card-border); }
 
-        /* Scanner */
         .scanner-area {
             position: relative;
             background: #1a1a2e;
@@ -393,7 +389,6 @@
         .btn-flash:hover { background: rgba(255,255,255,0.15); }
         .btn-flash.active { background: linear-gradient(135deg, #f1c40f, #f39c12); color: #2c3e50; border-color: #f1c40f; box-shadow: 0 0 20px rgba(241,196,15,0.5); }
 
-        /* Toast */
         #status {
             padding: 12px 16px; border-radius: 14px;
             font-weight: 600; font-size: 13px;
@@ -409,7 +404,6 @@
         #status.info { display: flex; background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: #1e40af; border-left-color: #3b82f6; }
         #status.warning { display: flex; background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; border-left-color: #f59e0b; }
 
-        /* Data section */
         .data-section {
             margin-top: 16px;
             background: var(--card-bg);
@@ -490,7 +484,6 @@
         @keyframes pulse-red { 0%, 100% { opacity: 1; box-shadow: 0 0 8px #f87171; } 50% { opacity: 0.3; box-shadow: none; } }
         @keyframes pulse-yellow { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
-        /* QR generate section */
         .qr-generate-section { padding: 12px 0 8px 0; }
         .qr-generate-section .qr-label {
             font-size: 13px; font-weight: 700;
@@ -547,7 +540,6 @@
         .qr-preview .qr-actions .btn-close { background: rgba(255, 255, 255, 0.1); color: var(--text); }
         .qr-preview .qr-actions .btn-close:hover { background: rgba(255, 255, 255, 0.2); }
 
-        /* Confetti */
         .confetti {
             position: fixed;
             width: 10px; height: 10px;
@@ -559,7 +551,6 @@
             100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
         }
 
-        /* Success pulse on scanner */
         .scanner-area.success-flash {
             animation: successFlash 1s ease;
         }
@@ -587,7 +578,6 @@
 </head>
 <body>
 
-    <!-- Background orbs -->
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
     <div class="orb orb-3"></div>
@@ -610,7 +600,6 @@
         <h1>Presensi Kelas</h1>
         <p class="subtitle">Scan QR Code untuk Absensi</p>
 
-        <!-- Stats -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-value green" id="statHadir">0</div>
@@ -626,7 +615,6 @@
             </div>
         </div>
 
-        <!-- Progress -->
         <div class="progress-container">
             <div class="progress-header">
                 <span>Progress Kehadiran</span>
@@ -1321,7 +1309,6 @@ async function processPresensi(qrData) {
       if (DOM.scanStatus) DOM.scanStatus.textContent = '✅ Hadir!';
       if (DOM.presensiStatus) DOM.presensiStatus.textContent = '✅ Hadir';
       
-      // 🎉 CELEBRATION!
       playBeep('success');
       launchConfetti();
       if (DOM.scannerArea) {
@@ -1428,7 +1415,6 @@ async function init() {
   updateClock();
   setInterval(updateClock, 1000);
 
-  const sheetLinkMhs = CONFIG.SHEET_URL + '#gid=' + CONFIG.SHEET_GID_MAHASISWA;
   const sheetLinkPres = CONFIG.SHEET_URL + '#gid=' + CONFIG.SHEET_GID_PRESENSI;
   if ($('sheetLink')) $('sheetLink').href = sheetLinkPres;
   if ($('footerSheetLink')) $('footerSheetLink').href = sheetLinkPres;
