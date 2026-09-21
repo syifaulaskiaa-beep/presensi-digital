@@ -897,4 +897,708 @@
                 <i class="fas fa-qrcode"></i> Generate QR Code Mahasiswa
             </div>
             <div class="qr-input-group">
-                <input type="text" id="qrNim
+                <input type="text" id="qrNimInput" placeholder="Masukkan NIM" maxlength="20">
+                <button onclick="generateQRCode()">
+                    <i class="fas fa-qrcode"></i> Generate
+                </button>
+            </div>
+            <div class="qr-preview" id="qrPreview">
+                <img id="qrResultImage" src="" alt="QR Code">
+                <div class="qr-info" id="qrInfo"></div>
+                <div class="qr-actions">
+                    <button class="btn-download" onclick="downloadQRCode()">
+                        <i class="fas fa-download"></i> Download
+                    </button>
+                    <button class="btn-close" onclick="closeQRPreview()">
+                        <i class="fas fa-times"></i> Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="connection-status" id="connectionStatus">
+            <span class="dot checking" id="statusDot"></span>
+            <span id="statusLabel">Mengecek koneksi...</span>
+        </div>
+
+        <div id="status"></div>
+
+        <div class="divider">
+            <span>scan QR Code</span>
+        </div>
+
+        <div class="scanner-area" id="scannerArea">
+            <div id="qr-reader"></div>
+            <div class="scanner-overlay">
+                <div class="scan-frame">
+                    <div class="corner corner-tl"></div>
+                    <div class="corner corner-tr"></div>
+                    <div class="corner corner-bl"></div>
+                    <div class="corner corner-br"></div>
+                    <div class="scan-line"></div>
+                </div>
+                <div class="scan-text">
+                    <i class="fas fa-qrcode"></i>
+                    <span id="scanStatusText">Arahkan ke QR Code</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="scanner-controls">
+            <button class="btn-scan" id="btnStartScan" onclick="toggleScanner()">
+                <i class="fas fa-play"></i> <span id="btnScanLabel">Mulai Scan</span>
+            </button>
+            <button class="btn-flash" id="btnFlash" onclick="toggleFlash()">
+                <i class="fas fa-bolt"></i>
+            </button>
+        </div>
+
+        <div class="data-section">
+            <div class="data-header">
+                <div class="title">
+                    <i class="fas fa-users"></i> Daftar Mahasiswa
+                </div>
+                <span class="count" id="totalMahasiswa">0 mahasiswa</span>
+            </div>
+            <div class="table-wrapper" id="tableWrapper">
+                <div class="loading-text" id="loadingData">
+                    <i class="fas fa-spinner fa-spin"></i> Memuat data...
+                </div>
+                <table id="dataTable" style="display:none;">
+                    <thead>
+                        <tr>
+                            <th>NIM</th>
+                            <th>Nama</th>
+                            <th>Kelas</th>
+                            <th>Jurusan</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="footer-note">
+            <i class="fas fa-shield-alt"></i> Terhubung dengan 
+            <a id="footerSheetLink" href="#" target="_blank">Google Sheets</a>
+            <br>
+            <span style="font-size:10px; opacity:0.6;">
+                <i class="fas fa-check-circle" style="color:#25d366;"></i> Status: <span id="presensiStatus">Menunggu scan</span>
+            </span>
+        </div>
+    </div>
+
+<script>
+/* ===================================================================
+   FRONTEND — Presensi Kelas QR
+   Data PERMANEN di Google Sheets (lihat file Code.gs terpisah).
+   localStorage hanya sebagai CACHE offline.
+   =================================================================== */
+
+/* ---------------- KONFIGURASI ---------------- */
+const CONFIG = {
+  // ▼▼▼ GANTI dengan URL Web App Apps Script Anda ▼▼▼
+  API_URL: 'https://script.google.com/macros/s/AKfycbwFaiXWeQmp9D1U6YKlNM2u28Dgp8mcnYmzWxoWXH_FS3Po3oWJt1-kknsCZ_yRDranPQ/exec',
+  SHEET_URL: 'https://docs.google.com/spreadsheets/d/1PXOSZAXZNg7hvX-33DglZlM3saj4yclUhiYepiFNYhI/edit?gid=0#gid=0',
+  SHEET_GID_MAHASISWA: '0',
+  SHEET_GID_PRESENSI: '646034675',
+  CACHE_KEY_MAHASISWA: 'presensi_mahasiswa_cache_v2',
+  CACHE_KEY_PRESENSI: 'presensi_hari_ini_cache_v2',
+  REFRESH_INTERVAL_MS: 30000,
+  RESCAN_DELAY_MS: 2500
+};
+/* --------------------------------------------- */
+
+/* ---------------- STATE ---------------- */
+const State = {
+  scanner: null,
+  scanning: false,
+  flashOn: false,
+  processing: false,
+  mahasiswa: [],
+  presensiHariIni: {},   // { nim: { waktu, ... } }
+  isOnline: false,
+  tanggalHariIni: ''
+};
+
+/* ---------------- DOM ---------------- */
+const $ = id => document.getElementById(id);
+const DOM = {
+  status: $('status'),
+  scanStatus: $('scanStatusText'),
+  presensiStatus: $('presensiStatus'),
+  btnStartScan: $('btnStartScan'),
+  btnFlash: $('btnFlash'),
+  qrImage: $('qrImage'),
+  tableBody: $('tableBody'),
+  dataTable: $('dataTable'),
+  loadingData: $('loadingData'),
+  totalMahasiswa: $('totalMahasiswa'),
+  statusDot: $('statusDot'),
+  statusLabel: $('statusLabel'),
+  qrNimInput: $('qrNimInput'),
+  qrResultImage: $('qrResultImage'),
+  qrInfo: $('qrInfo'),
+  qrPreview: $('qrPreview')
+};
+
+/* ================== UTIL ================== */
+function todayStr() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${dd}`;
+}
+
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+
+function setConnectionStatus(status, message) {
+  if (!DOM.statusDot || !DOM.statusLabel) return;
+  DOM.statusDot.className = 'dot ' + status;
+  DOM.statusLabel.textContent = message;
+  State.isOnline = (status === 'online');
+}
+
+let statusTimer;
+function showStatus(message, type = 'info', duration = 4000) {
+  if (!DOM.status) return;
+  const iconMap = {
+    success: 'fa-check-circle',
+    error: 'fa-exclamation-circle',
+    warning: 'fa-triangle-exclamation',
+    info: 'fa-info-circle'
+  };
+  DOM.status.innerHTML = `<i class="fas ${iconMap[type] || iconMap.info}"></i> ${message}`;
+  DOM.status.className = type;
+  DOM.status.style.display = 'flex';
+  clearTimeout(statusTimer);
+  if (duration > 0) {
+    statusTimer = setTimeout(() => { DOM.status.style.display = 'none'; }, duration);
+  }
+}
+
+/* ================== API HELPER ================== */
+async function apiGet(action, params = {}) {
+  const qs = new URLSearchParams({ action, t: Date.now(), ...params });
+  const res = await fetch(CONFIG.API_URL + '?' + qs.toString(), {
+    method: 'GET',
+    redirect: 'follow'
+  });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return res.json();
+}
+
+async function apiPost(action, payload = {}) {
+  // Pakai text/plain untuk menghindari preflight CORS (Apps Script tidak handle OPTIONS)
+  const res = await fetch(CONFIG.API_URL, {
+    method: 'POST',
+    redirect: 'follow',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action, ...payload })
+  });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return res.json();
+}
+
+/* ================== CACHE ================== */
+function loadCacheMahasiswa() {
+  try {
+    const raw = localStorage.getItem(CONFIG.CACHE_KEY_MAHASISWA);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+function saveCacheMahasiswa(data) {
+  try { localStorage.setItem(CONFIG.CACHE_KEY_MAHASISWA, JSON.stringify(data)); } catch {}
+}
+
+function loadCachePresensi() {
+  try {
+    const raw = localStorage.getItem(CONFIG.CACHE_KEY_PRESENSI);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed.tanggal !== todayStr()) return null; // cache dari hari lain, abaikan
+    return parsed.map || {};
+  } catch { return null; }
+}
+
+function saveCachePresensi(map) {
+  try {
+    localStorage.setItem(CONFIG.CACHE_KEY_PRESENSI, JSON.stringify({
+      tanggal: todayStr(),
+      map
+    }));
+  } catch {}
+}
+
+/* ================== LOAD DATA ================== */
+async function checkConnection() {
+  setConnectionStatus('checking', 'Mengecek koneksi...');
+  try {
+    const json = await apiGet('ping');
+    if (json.success) {
+      setConnectionStatus('online', '✅ Terhubung ke server');
+      return true;
+    }
+    throw new Error(json.error || 'Ping gagal');
+  } catch (err) {
+    setConnectionStatus('offline', '📴 Offline');
+    return false;
+  }
+}
+
+async function loadAllData() {
+  State.tanggalHariIni = todayStr();
+
+  // 1) Tampilkan cache dulu supaya UI cepat
+  const cachedMhs = loadCacheMahasiswa();
+  if (cachedMhs.length) {
+    State.mahasiswa = cachedMhs;
+    State.presensiHariIni = loadCachePresensi() || {};
+    renderDataTable();
+  } else {
+    if (DOM.loadingData) DOM.loadingData.style.display = 'block';
+    if (DOM.dataTable) DOM.dataTable.style.display = 'none';
+  }
+
+  // 2) Coba sinkron ke server
+  const online = await checkConnection();
+  if (!online) {
+    if (!cachedMhs.length) {
+      showEmptyState('offline');
+    } else {
+      showStatus('📂 Mode offline — data dari cache', 'warning', 3000);
+    }
+    return;
+  }
+
+  try {
+    // Ambil mahasiswa
+    const mhsRes = await apiGet('get_all');
+    if (mhsRes.success && Array.isArray(mhsRes.data)) {
+      State.mahasiswa = mhsRes.data;
+      saveCacheMahasiswa(mhsRes.data);
+    } else {
+      showStatus('⚠️ ' + (mhsRes.error || 'Gagal memuat mahasiswa'), 'warning', 3500);
+    }
+
+    // Ambil presensi hari ini
+    const presRes = await apiGet('get_presensi', { tanggal: todayStr() });
+    if (presRes.success && Array.isArray(presRes.data)) {
+      const map = {};
+      presRes.data.forEach(p => { if (p.nim) map[String(p.nim).trim()] = p; });
+      State.presensiHariIni = map;
+      saveCachePresensi(map);
+    }
+
+    renderDataTable();
+    showStatus(`✅ ${State.mahasiswa.length} mahasiswa · ${Object.keys(State.presensiHariIni).length} hadir hari ini`, 'success', 2500);
+  } catch (err) {
+    console.error(err);
+    if (State.mahasiswa.length) {
+      showStatus('⚠️ Gagal sinkron server — pakai cache', 'warning', 3500);
+      renderDataTable();
+    } else {
+      showEmptyState('error', err.message);
+    }
+  }
+}
+
+/* ================== RENDER ================== */
+function renderDataTable() {
+  if (!DOM.tableBody || !DOM.dataTable || !DOM.loadingData) return;
+  DOM.tableBody.innerHTML = '';
+
+  if (!State.mahasiswa.length) {
+    showEmptyState('empty');
+    return;
+  }
+
+  State.mahasiswa.forEach(mhs => {
+    const nim = String(mhs.nim || '').trim();
+    const hadir = !!State.presensiHariIni[nim];
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${escapeHtml(nim || '-')}</strong></td>
+      <td>${escapeHtml(mhs.nama || '-')}</td>
+      <td>${escapeHtml(mhs.kelas || '-')}</td>
+      <td>${escapeHtml(mhs.jurusan || '-')}</td>
+      <td>
+        <span class="${hadir ? 'status-hadir' : 'status-belum'}">
+          <i class="fas ${hadir ? 'fa-check-circle' : 'fa-circle'}"></i>
+          ${hadir ? 'Hadir' : 'Belum'}
+        </span>
+      </td>`;
+    DOM.tableBody.appendChild(tr);
+  });
+
+  DOM.loadingData.style.display = 'none';
+  DOM.dataTable.style.display = 'table';
+  const totalHadir = Object.keys(State.presensiHariIni).length;
+  DOM.totalMahasiswa.textContent = `${totalHadir} / ${State.mahasiswa.length} mahasiswa`;
+}
+
+function showEmptyState(kind, detail = '') {
+  if (!DOM.loadingData) return;
+  DOM.dataTable.style.display = 'none';
+  DOM.loadingData.style.display = 'block';
+  DOM.totalMahasiswa.textContent = '0 mahasiswa';
+
+  if (kind === 'offline') {
+    DOM.loadingData.innerHTML = `
+      <i class="fas fa-wifi" style="color:#f87171;font-size:24px;display:block;margin-bottom:12px;"></i>
+      <strong style="color:#f87171;">Tidak Ada Koneksi</strong><br><br>
+      <span style="color:rgba(255,255,255,0.5);font-size:12px;">Tidak ada internet & tidak ada cache.</span><br><br>
+      <button onclick="loadAllData()" style="padding:8px 20px;background:#25d366;color:white;border:none;border-radius:8px;cursor:pointer;">
+        <i class="fas fa-sync-alt"></i> Coba Lagi
+      </button>`;
+  } else if (kind === 'empty') {
+    DOM.loadingData.innerHTML = `
+      <i class="fas fa-info-circle" style="color:#fbbf24;font-size:20px;display:block;margin-bottom:12px;"></i>
+      <strong style="color:#fbbf24;">Belum ada data mahasiswa</strong><br><br>
+      <span style="color:rgba(255,255,255,0.5);font-size:12px;">Tambahkan data di sheet "Mahasiswa".</span><br><br>
+      <a href="${CONFIG.SHEET_URL}" target="_blank" style="padding:8px 20px;background:#25d366;color:white;border:none;border-radius:8px;cursor:pointer;text-decoration:none;display:inline-block;">
+        <i class="fas fa-external-link-alt"></i> Buka Google Sheets
+      </a>`;
+  } else {
+    DOM.loadingData.innerHTML = `
+      <i class="fas fa-exclamation-circle" style="color:#ef4444;font-size:24px;display:block;margin-bottom:12px;"></i>
+      <strong style="color:#ef4444;">Gagal Memuat Data</strong><br><br>
+      <span style="color:rgba(255,255,255,0.5);font-size:12px;">${escapeHtml(detail)}</span><br><br>
+      <button onclick="loadAllData()" style="padding:8px 20px;background:#25d366;color:white;border:none;border-radius:8px;cursor:pointer;">
+        <i class="fas fa-sync-alt"></i> Coba Lagi
+      </button>`;
+  }
+}
+
+/* ================== QR UMUM ================== */
+function generateQR() {
+  if (!DOM.qrImage) return;
+  const qrData = {
+    nim: 'ABSENSI-KELAS',
+    nama: 'Presensi Kelas',
+    kelas: 'Semua',
+    jurusan: 'Semua',
+    link_sheet: CONFIG.SHEET_URL,
+    timestamp: new Date().toISOString()
+  };
+  DOM.qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(JSON.stringify(qrData))}`;
+}
+
+function downloadQR() {
+  if (!DOM.qrImage.src) { alert('QR Code belum siap.'); return; }
+  const a = document.createElement('a');
+  a.download = 'qr-presensi-kelas.png';
+  a.href = DOM.qrImage.src;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+/* ================== QR PER MAHASISWA ================== */
+function generateQRCode() {
+  const nim = DOM.qrNimInput.value.trim();
+  if (!nim) { showStatus('❌ Masukkan NIM terlebih dahulu', 'error'); DOM.qrNimInput.focus(); return; }
+  if (nim.length < 3) { showStatus('❌ NIM minimal 3 karakter', 'error'); return; }
+
+  const mhs = State.mahasiswa.find(m => String(m.nim).trim() === nim);
+  if (!mhs) { showStatus(`❌ NIM ${escapeHtml(nim)} tidak terdaftar!`, 'error'); return; }
+
+  const qrData = {
+    nim: mhs.nim,
+    nama: mhs.nama,
+    kelas: mhs.kelas,
+    jurusan: mhs.jurusan,
+    link_sheet: CONFIG.SHEET_URL,
+    timestamp: new Date().toISOString()
+  };
+  DOM.qrResultImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(JSON.stringify(qrData))}`;
+  DOM.qrInfo.innerHTML = `
+    <strong>NIM:</strong> ${escapeHtml(mhs.nim)} &bull;
+    <strong>Nama:</strong> ${escapeHtml(mhs.nama)} &bull;
+    <strong>Kelas:</strong> ${escapeHtml(mhs.kelas)} &bull;
+    <strong>Jurusan:</strong> ${escapeHtml(mhs.jurusan)}
+    <div style="margin-top:6px;font-size:12px;color:#25d366;">
+      <i class="fas fa-check-circle"></i> Scan QR untuk presensi
+    </div>`;
+  DOM.qrPreview.classList.add('show');
+  showStatus(`✅ QR Code dibuat untuk ${escapeHtml(mhs.nama)} (${escapeHtml(nim)})`, 'success');
+}
+
+function downloadQRCode() {
+  if (!DOM.qrResultImage.src) { showStatus('❌ Tidak ada QR Code', 'error'); return; }
+  const a = document.createElement('a');
+  const nim = DOM.qrNimInput.value.trim() || 'mahasiswa';
+  a.download = `qr-code-${nim}.png`;
+  a.href = DOM.qrResultImage.src;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  showStatus('✅ QR Code berhasil didownload!', 'success');
+}
+
+function closeQRPreview() {
+  DOM.qrPreview.classList.remove('show');
+  DOM.qrNimInput.value = '';
+}
+
+/* ================== SCANNER ================== */
+function toggleScanner() {
+  if (State.scanning) stopScanner();
+  else startScanner();
+}
+
+function startScanner() {
+  if (State.scanning) return;
+
+  if (State.scanner) {
+    try { State.scanner.clear(); } catch {}
+    State.scanner = null;
+  }
+
+  const readerEl = $('qr-reader');
+  if (readerEl) readerEl.innerHTML = '';
+
+  if (DOM.btnStartScan) {
+    DOM.btnStartScan.classList.add('stop');
+    DOM.btnStartScan.innerHTML = '<i class="fas fa-stop"></i> Stop Scan';
+  }
+
+  try {
+    State.scanner = new Html5Qrcode("qr-reader", {
+      verbose: false,
+      formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE]
+    });
+
+    const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
+    const onSuccess = (text) => onScanSuccess(text);
+    const onError = () => {};
+
+    State.scanner.start({ facingMode: "environment" }, config, onSuccess, onError)
+      .then(() => onScannerStarted('📷 Kamera belakang aktif'))
+      .catch(() => {
+        State.scanner.start({ facingMode: "user" }, config, onSuccess, onError)
+          .then(() => onScannerStarted('📷 Kamera depan aktif'))
+          .catch(err2 => {
+            showStatus('❌ Gagal akses kamera: ' + err2.message, 'error', 0);
+            resetScannerButton();
+          });
+      });
+  } catch (err) {
+    showStatus('❌ Gagal inisialisasi scanner', 'error', 0);
+    resetScannerButton();
+  }
+}
+
+function onScannerStarted(msg) {
+  State.scanning = true;
+  if (DOM.scanStatus) DOM.scanStatus.textContent = '🔍 Mendeteksi QR Code...';
+  if (DOM.presensiStatus) DOM.presensiStatus.textContent = 'Mendeteksi...';
+  showStatus(msg, 'info', 3000);
+}
+
+function stopScanner() {
+  if (State.scanner && State.scanning) {
+    State.scanner.stop()
+      .then(() => {
+        try { State.scanner.clear(); } catch {}
+        State.scanner = null;
+        State.scanning = false;
+        resetScannerButton();
+        if (DOM.scanStatus) DOM.scanStatus.textContent = '⏸ Scanner berhenti';
+      })
+      .catch(() => {});
+  } else {
+    State.scanning = false;
+    resetScannerButton();
+  }
+}
+
+function resetScannerButton() {
+  if (!DOM.btnStartScan) return;
+  DOM.btnStartScan.classList.remove('stop');
+  DOM.btnStartScan.innerHTML = '<i class="fas fa-play"></i> <span id="btnScanLabel">Mulai Scan</span>';
+}
+
+/* ================== SCAN SUCCESS ================== */
+function onScanSuccess(decodedText) {
+  if (State.processing) return;
+  State.processing = true;
+
+  if (State.scanner && State.scanning) {
+    State.scanner.stop()
+      .then(() => { try { State.scanner.clear(); } catch {} State.scanner = null; State.scanning = false; resetScannerButton(); })
+      .catch(() => {});
+  }
+
+  processPresensi(decodedText);
+}
+
+/* ================== PROSES PRESENSI (INTI) ================== */
+async function processPresensi(qrData) {
+  const tanggal = todayStr();
+  try {
+    showStatus('⏳ Memproses presensi...', 'info', 0);
+
+    /* 1) Parse payload */
+    let nim = '';
+    try {
+      const parsed = JSON.parse(qrData);
+      nim = String(parsed.nim || '').trim();
+    } catch {
+      nim = String(qrData || '').trim();
+    }
+
+    if (!nim || nim.length < 3) {
+      showStatus('❌ NIM tidak valid (minimal 3 karakter)', 'error');
+      return;
+    }
+
+    /* 2) Cek mahasiswa terdaftar */
+    const mhs = State.mahasiswa.find(m => String(m.nim).trim() === nim);
+    if (!mhs) {
+      showStatus(`❌ NIM ${escapeHtml(nim)} tidak terdaftar!`, 'error');
+      return;
+    }
+
+    /* 3) Cek duplikat lokal dulu (cepat) */
+    if (State.presensiHariIni[nim]) {
+      showStatus(`⚠️ ${escapeHtml(mhs.nama)} sudah presensi hari ini!`, 'warning');
+      if (DOM.scanStatus) DOM.scanStatus.textContent = '⚠️ Sudah presensi';
+      if (DOM.presensiStatus) DOM.presensiStatus.textContent = '⚠️ Sudah hadir';
+      return;
+    }
+
+    /* 4) Kirim ke server (server juga cek duplikat) */
+    const payload = {
+      nim,
+      nama: mhs.nama || '',
+      kelas: mhs.kelas || '',
+      jurusan: mhs.jurusan || '',
+      mataKuliah: 'Presensi Kelas',
+      status: 'Hadir'
+    };
+
+    let result;
+    try {
+      result = await apiPost('presensi', payload);
+    } catch (netErr) {
+      // Offline: simpan lokal + kasih tahu user
+      State.presensiHariIni[nim] = { nim, tanggal, offline: true, waktu: new Date().toLocaleString('id-ID') };
+      saveCachePresensi(State.presensiHariIni);
+      renderDataTable();
+      showStatus(`📴 Offline — ${escapeHtml(mhs.nama)} dicatat lokal. Sinkronkan saat online.`, 'warning', 5000);
+      if (DOM.scanStatus) DOM.scanStatus.textContent = '📴 Tersimpan lokal';
+      return;
+    }
+
+    if (result.success) {
+      // Sukses → update map & tabel
+      State.presensiHariIni[nim] = { nim, tanggal, waktu: result.waktu || '', nama: mhs.nama };
+      saveCachePresensi(State.presensiHariIni);
+      renderDataTable();
+      showStatus(`✅ ${escapeHtml(mhs.nama)} HADIR — tersimpan di Google Sheets`, 'success', 3500);
+      if (DOM.scanStatus) DOM.scanStatus.textContent = '✅ Hadir!';
+      if (DOM.presensiStatus) DOM.presensiStatus.textContent = '✅ Hadir';
+    } else if (result.already) {
+      State.presensiHariIni[nim] = { nim, tanggal, waktu: result.data?.waktu || '' };
+      saveCachePresensi(State.presensiHariIni);
+      renderDataTable();
+      showStatus(`⚠️ ${escapeHtml(mhs.nama)} sudah presensi hari ini (server)`, 'warning', 3500);
+      if (DOM.scanStatus) DOM.scanStatus.textContent = '⚠️ Sudah presensi';
+    } else {
+      showStatus('❌ ' + (result.error || 'Gagal menyimpan presensi'), 'error', 4000);
+    }
+  } catch (err) {
+    console.error(err);
+    showStatus('❌ Error: ' + err.message, 'error', 4000);
+  } finally {
+    setTimeout(() => {
+      State.processing = false;
+      if (DOM.scanStatus) DOM.scanStatus.textContent = 'Arahkan ke QR Code';
+      if (!State.scanning) startScanner();
+    }, CONFIG.RESCAN_DELAY_MS);
+  }
+}
+
+/* ================== FLASH ================== */
+async function toggleFlash() {
+  State.flashOn = !State.flashOn;
+  if (!DOM.btnFlash) return;
+
+  if (State.flashOn) {
+    DOM.btnFlash.classList.add('active');
+    DOM.btnFlash.innerHTML = '<i class="fas fa-bolt" style="color:#f1c40f;"></i>';
+  } else {
+    DOM.btnFlash.classList.remove('active');
+    DOM.btnFlash.innerHTML = '<i class="fas fa-bolt"></i>';
+  }
+
+  try {
+    const video = document.querySelector('#qr-reader video');
+    if (!video || !video.srcObject) return;
+    const track = video.srcObject.getVideoTracks()[0];
+    if (!track) return;
+    const caps = track.getCapabilities ? track.getCapabilities() : {};
+    if (caps.torch) {
+      await track.applyConstraints({ advanced: [{ torch: State.flashOn }] });
+    }
+  } catch (e) { /* torch tidak didukung */ }
+}
+
+/* ================== IZIN KAMERA ================== */
+async function checkCameraPermission() {
+  try {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      showStatus('❌ Browser tidak mendukung kamera', 'error', 0);
+      return false;
+    }
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+    stream.getTracks().forEach(t => t.stop());
+    return true;
+  } catch {
+    showStatus('❌ Izin kamera diperlukan untuk scan QR Code', 'error', 0);
+    return false;
+  }
+}
+
+/* ================== INIT ================== */
+async function init() {
+  State.tanggalHariIni = todayStr();
+
+  // Setup link sheet
+  const sheetLinkMhs = CONFIG.SHEET_URL + '#gid=' + CONFIG.SHEET_GID_MAHASISWA;
+  const sheetLinkPres = CONFIG.SHEET_URL + '#gid=' + CONFIG.SHEET_GID_PRESENSI;
+  if ($('sheetLink')) $('sheetLink').href = sheetLinkPres;
+  if ($('footerSheetLink')) $('footerSheetLink').href = sheetLinkPres;
+
+  generateQR();
+  if (DOM.presensiStatus) DOM.presensiStatus.textContent = 'Menunggu scan...';
+
+  // Load data (cache dulu, lalu server)
+  await loadAllData();
+
+  // Auto-refresh tiap 30 detik
+  setInterval(() => { loadAllData(); }, CONFIG.REFRESH_INTERVAL_MS);
+
+  // Cek izin kamera & auto-start
+  const cameraReady = await checkCameraPermission();
+  if (cameraReady) {
+    setTimeout(startScanner, 800);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', init);
+
+window.addEventListener('beforeunload', function () {
+  if (State.scanner && State.scanning) {
+    State.scanner.stop().then(() => { try { State.scanner.clear(); } catch {} }).catch(() => {});
+  }
+});
+</script>
+
+</body>
+</html>
