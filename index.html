@@ -214,71 +214,99 @@ input[type="text"]:focus{ border-color: var(--accent); }
 .modal-row:last-child{ border-bottom:none; }
 .modal-row span:first-child{ color: var(--ink-dim); }
 
-/* ---------- KALENDER KEHADIRAN ---------- */
-.cal-header{
+/* ---------- KALENDER KEHADIRAN (compact) ---------- */
+.cal-panel{ padding:16px 18px !important; }
+
+.cal-topbar{
   display:flex; justify-content:space-between; align-items:center;
-  gap:12px; margin-bottom:16px; flex-wrap:wrap;
+  gap:10px; margin-bottom:12px; flex-wrap:wrap;
 }
-.cal-nav{ display:flex; align-items:center; gap:6px; }
-.cal-btn{
+.cal-topbar h3{ font-size:14px !important; }
+
+.cal-jump{ display:flex; gap:6px; align-items:center; }
+.cal-select{
   background: rgba(61,139,253,0.10);
   border:1px solid var(--glass-border);
-  color: var(--ink-dim); width:30px; height:30px; border-radius:8px;
-  cursor:pointer; display:flex; align-items:center; justify-content:center;
-  transition: all .2s ease; font-family: inherit;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size:11.5px; font-weight:500;
+  padding:5px 8px; border-radius:8px;
+  cursor:pointer; outline:none;
+  color-scheme: dark;
 }
-.cal-btn:hover{ color: var(--accent); border-color: var(--accent); background: rgba(61,139,253,0.2); }
+.cal-select:hover{ border-color: var(--accent); }
+.cal-select:focus{ border-color: var(--accent); }
+
+.cal-navbar{
+  display:flex; justify-content:center; align-items:center;
+  gap:6px; margin-bottom:10px;
+}
+.cal-btn{
+  background: rgba(61,139,253,0.08);
+  border:1px solid var(--glass-border);
+  color: var(--ink-dim);
+  border-radius:7px;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  transition: all .18s ease; font-family: inherit;
+}
+.cal-btn.small{
+  height:24px; min-width:24px; padding:0 6px;
+  font-size:11px; line-height:1;
+}
+.cal-btn:hover{
+  color: var(--accent); border-color: var(--accent);
+  background: rgba(61,139,253,0.2);
+}
 .cal-btn.today-btn{
-  width:auto; padding:0 12px; font-size:11.5px; font-weight:600;
+  padding:0 10px; font-size:11px; font-weight:600;
   color: var(--ink); letter-spacing:.3px;
+  height:26px;
 }
 .cal-title{
-  font-family: var(--font-display); font-size:15px; font-weight:600;
-  color: var(--ink); min-width:150px; text-align:center;
+  font-family: var(--font-display); font-size:13px; font-weight:600;
+  color: var(--ink); min-width:130px; text-align:center;
 }
 
 .cal-weekdays{
-  display:grid; grid-template-columns: repeat(7, 1fr); gap:6px;
-  margin-bottom:6px; padding: 0 2px;
+  display:grid; grid-template-columns: repeat(7, 1fr); gap:3px;
+  margin-bottom:4px;
 }
 .wd{
-  text-align:center; font-family: var(--font-mono); font-size:10.5px;
-  color: var(--ink-dim); text-transform:uppercase; letter-spacing:.5px;
-  padding:4px 0;
+  text-align:center; font-family: var(--font-mono); font-size:9.5px;
+  color: var(--ink-dim); text-transform:uppercase; letter-spacing:.4px;
+  padding:2px 0;
 }
 .wd-sun{ color: #ef6b6b; }
 .wd-sat{ color: #4d9fff; }
 
 .cal-grid{
-  display:grid; grid-template-columns: repeat(7, 1fr); gap:6px;
+  display:grid; grid-template-columns: repeat(7, 1fr); gap:3px;
 }
 
 .cal-day{
-  aspect-ratio: 1; border-radius:10px;
+  height:32px; border-radius:6px;
   display:flex; flex-direction:column; align-items:center; justify-content:center;
-  font-family: var(--font-mono); font-size:13px; font-weight:600;
+  font-family: var(--font-mono); font-size:11px; font-weight:600;
   color: var(--ink-dim); cursor:pointer; position:relative;
-  transition: all .2s ease; padding:4px; line-height:1.1;
+  transition: all .15s ease; padding:2px; line-height:1;
   border:1px solid transparent; background: rgba(61,139,253,0.04);
 }
-.cal-day .cd-num{ font-size:13px; font-weight:700; }
+.cal-day .cd-num{ font-size:11px; font-weight:700; line-height:1; }
 .cal-day .cd-count{
-  font-size:9px; opacity:.75; margin-top:2px; letter-spacing:.3px;
+  font-size:7.5px; opacity:.85; margin-top:1px; letter-spacing:.2px; line-height:1;
 }
 .cal-day:hover{
-  transform: scale(1.05); z-index:2;
+  transform: translateY(-1px); z-index:2;
   border-color: var(--accent);
-  box-shadow: 0 8px 20px -8px rgba(61,139,253,0.6);
+  box-shadow: 0 4px 12px -4px rgba(61,139,253,0.6);
 }
 
-.cal-day.other-month{
-  opacity:.28; font-size:11px; background: transparent;
-}
+.cal-day.other-month{ opacity:.22; background: transparent; }
 .cal-day.other-month .cd-count{ display:none; }
 
 .cal-day.today{
-  border:2px solid var(--accent-2) !important;
-  box-shadow: 0 0 12px rgba(46,197,182,0.5);
+  border:1.5px solid var(--accent-2) !important;
+  box-shadow: 0 0 8px rgba(46,197,182,0.5);
   color: var(--accent-2);
 }
 
@@ -289,21 +317,20 @@ input[type="text"]:focus{ border-color: var(--accent); }
 .cal-day[data-level="2"]{ background: rgba(61,139,253,0.38); color: #fff; }
 .cal-day[data-level="3"]{ background: rgba(61,139,253,0.60); color: #fff; }
 .cal-day[data-level="4"]{ background: var(--accent); color:#fff; }
-.cal-day[data-level="4"] .cd-num{ text-shadow: 0 1px 2px rgba(0,0,0,.3); }
 .cal-day[data-level="0"].no-data{ opacity:.55; }
 
 .cal-footer{
   display:flex; justify-content:space-between; align-items:center;
-  margin-top:14px; padding-top:14px; border-top:1px solid var(--line);
-  flex-wrap:wrap; gap:10px;
+  margin-top:10px; padding-top:10px; border-top:1px solid var(--line);
+  flex-wrap:wrap; gap:8px;
 }
 .cal-legend{
-  display:flex; align-items:center; gap:6px;
-  font-family: var(--font-mono); font-size:10.5px; color: var(--ink-dim);
+  display:flex; align-items:center; gap:4px;
+  font-family: var(--font-mono); font-size:9.5px; color: var(--ink-dim);
 }
-.cal-legend .legend-label{ padding:0 4px; }
+.cal-legend .legend-label{ padding:0 3px; }
 .legend-cell{
-  width:14px; height:14px; border-radius:4px;
+  width:10px; height:10px; border-radius:3px;
   background: rgba(61,139,253,0.04); display:inline-block;
   border:1px solid var(--glass-border);
 }
@@ -314,8 +341,8 @@ input[type="text"]:focus{ border-color: var(--accent); }
 .legend-cell[data-level="4"]{ background: var(--accent); }
 
 .cal-stats{
-  font-family: var(--font-mono); font-size:11px; color: var(--ink-dim);
-  display:flex; gap:14px; flex-wrap:wrap;
+  font-family: var(--font-mono); font-size:10px; color: var(--ink-dim);
+  display:flex; gap:10px; flex-wrap:wrap;
 }
 .cal-stats b{ color: var(--accent); font-weight:600; }
 
@@ -334,9 +361,11 @@ input[type="text"]:focus{ border-color: var(--accent); }
   .mobile-nav-toggle svg{ width:18px; height:18px; }
   .main{ padding: 20px 18px 50px; }
   .stat-grid{ grid-template-columns: 1fr 1fr; }
-  .cal-title{ font-size:13px; min-width:120px; }
-  .cal-day .cd-num{ font-size:11px; }
-  .cal-day .cd-count{ font-size:8px; }
+  .cal-title{ font-size:12px; min-width:100px; }
+  .cal-day{ height:28px; }
+  .cal-day .cd-num{ font-size:10px; }
+  .cal-day .cd-count{ font-size:7px; }
+  .cal-jump{ width:100%; justify-content:flex-end; }
 }
 </style>
 </head>
@@ -451,20 +480,23 @@ input[type="text"]:focus{ border-color: var(--accent); }
         </div>
       </div>
 
-      <!-- KALENDER KEHADIRAN -->
-      <div class="panel" style="margin-top:18px;">
-        <div class="cal-header">
+      <!-- KALENDER KEHADIRAN (compact) -->
+      <div class="panel cal-panel" style="margin-top:18px;">
+        <div class="cal-topbar">
           <h3 style="margin:0;">&#128197; Kalender Kehadiran</h3>
-          <div class="cal-nav">
-            <button class="cal-btn" id="calPrev" title="Bulan sebelumnya">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path d="M15 18l-6-6 6-6"/></svg>
-            </button>
-            <span class="cal-title" id="calTitle">—</span>
-            <button class="cal-btn" id="calNext" title="Bulan berikutnya">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path d="M9 18l6-6-6-6"/></svg>
-            </button>
-            <button class="cal-btn today-btn" id="calToday" title="Kembali ke hari ini">Hari ini</button>
+          <div class="cal-jump">
+            <select id="calMonthSelect" class="cal-select"></select>
+            <select id="calYearSelect" class="cal-select"></select>
+            <button class="cal-btn today-btn" id="calToday" title="Ke hari ini">Hari ini</button>
           </div>
+        </div>
+
+        <div class="cal-navbar">
+          <button class="cal-btn small" id="calPrevYear" title="Tahun sebelumnya">&#9664;&#9664;</button>
+          <button class="cal-btn small" id="calPrev" title="Bulan sebelumnya">&#9664;</button>
+          <span class="cal-title" id="calTitle">—</span>
+          <button class="cal-btn small" id="calNext" title="Bulan berikutnya">&#9654;</button>
+          <button class="cal-btn small" id="calNextYear" title="Tahun berikutnya">&#9654;&#9654;</button>
         </div>
 
         <div class="cal-weekdays">
@@ -911,6 +943,45 @@ const calNow = new Date();
 calYear = calNow.getFullYear();
 calMonth = calNow.getMonth();
 
+const MONTH_NAMES = ["Januari","Februari","Maret","April","Mei","Juni",
+                     "Juli","Agustus","September","Oktober","November","Desember"];
+
+function initCalDropdowns(){
+  const monthSel = document.getElementById("calMonthSelect");
+  const yearSel = document.getElementById("calYearSelect");
+  if (!monthSel || !yearSel) return;
+
+  monthSel.innerHTML = MONTH_NAMES.map((m, i) =>
+    `<option value="${i}">${m}</option>`
+  ).join("");
+
+  const currentY = new Date().getFullYear();
+  const years = [];
+  for (let y = currentY + 5; y >= currentY - 10; y--) years.push(y);
+  yearSel.innerHTML = years.map(y =>
+    `<option value="${y}">${y}</option>`
+  ).join("");
+
+  monthSel.value = calMonth;
+  yearSel.value = calYear;
+
+  monthSel.addEventListener("change", () => {
+    calMonth = parseInt(monthSel.value);
+    loadHeatmap();
+  });
+  yearSel.addEventListener("change", () => {
+    calYear = parseInt(yearSel.value);
+    loadHeatmap();
+  });
+}
+
+function syncCalDropdowns(){
+  const monthSel = document.getElementById("calMonthSelect");
+  const yearSel = document.getElementById("calYearSelect");
+  if (monthSel) monthSel.value = calMonth;
+  if (yearSel) yearSel.value = calYear;
+}
+
 async function loadHeatmap(){
   const grid = document.getElementById("calGrid");
   const titleEl = document.getElementById("calTitle");
@@ -920,9 +991,8 @@ async function loadHeatmap(){
   const totalMhs = Math.max(1, mahasiswaList.length);
   const todayKey = todayStr();
 
-  const monthNames = ["Januari","Februari","Maret","April","Mei","Juni",
-                      "Juli","Agustus","September","Oktober","November","Desember"];
-  titleEl.textContent = `${monthNames[calMonth]} ${calYear}`;
+  titleEl.textContent = `${MONTH_NAMES[calMonth]} ${calYear}`;
+  syncCalDropdowns();
 
   const firstDay = new Date(calYear, calMonth, 1).getDay();
   const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
@@ -933,14 +1003,12 @@ async function loadHeatmap(){
   let hariAktif = 0;
   let hariTerbaik = { tgl: null, count: 0 };
 
-  // Sisa hari dari bulan sebelumnya
   for (let i = firstDay - 1; i >= 0; i--){
     const d = daysInPrev - i;
     const prevDate = new Date(calYear, calMonth - 1, d);
     cells.push(renderCalDay(prevDate, true, totalMhs, todayKey));
   }
 
-  // Hari-hari di bulan ini
   for (let d = 1; d <= daysInMonth; d++){
     const dateObj = new Date(calYear, calMonth, d);
     const key = formatDateKey(calYear, calMonth, d);
@@ -981,7 +1049,6 @@ async function loadHeatmap(){
     `);
   }
 
-  // Hari dari bulan berikutnya (sampai grid penuh)
   const totalCells = cells.length;
   const remaining = (7 - (totalCells % 7)) % 7;
   for (let d = 1; d <= remaining; d++){
@@ -993,9 +1060,9 @@ async function loadHeatmap(){
 
   if (statsEl){
     statsEl.innerHTML = `
-      <span>Total hadir: <b>${totalHadirBulan}</b></span>
-      <span>Hari aktif: <b>${hariAktif}</b></span>
-      ${hariTerbaik.tgl ? `<span>Terbaik: <b>${hariTerbaik.tgl} ${monthNames[calMonth].slice(0,3)}</b> (${hariTerbaik.count})</span>` : ""}
+      <span>Hadir: <b>${totalHadirBulan}</b></span>
+      <span>Aktif: <b>${hariAktif}</b></span>
+      ${hariTerbaik.tgl ? `<span>Terbaik: <b>${hariTerbaik.tgl}/${calMonth+1}</b> (${hariTerbaik.count})</span>` : ""}
     `;
   }
 
@@ -1035,6 +1102,7 @@ function renderCalDay(dateObj, isOtherMonth, totalMhs, todayKey){
   `;
 }
 
+/* ===================== NAVIGASI KALENDER ===================== */
 document.getElementById("calPrev")?.addEventListener("click", () => {
   calMonth--;
   if (calMonth < 0){ calMonth = 11; calYear--; }
@@ -1044,6 +1112,16 @@ document.getElementById("calPrev")?.addEventListener("click", () => {
 document.getElementById("calNext")?.addEventListener("click", () => {
   calMonth++;
   if (calMonth > 11){ calMonth = 0; calYear++; }
+  loadHeatmap();
+});
+
+document.getElementById("calPrevYear")?.addEventListener("click", () => {
+  calYear--;
+  loadHeatmap();
+});
+
+document.getElementById("calNextYear")?.addEventListener("click", () => {
+  calYear++;
   loadHeatmap();
 });
 
@@ -1421,6 +1499,7 @@ genAllBtn.addEventListener("click", async () => {
 });
 
 /* ===================== INIT ===================== */
+initCalDropdowns();
 loadBeranda();
 </script>
 </body>
