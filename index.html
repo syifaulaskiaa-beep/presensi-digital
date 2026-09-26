@@ -147,6 +147,7 @@ h1{ font-family: var(--font-display); font-weight:600; font-size:28px; margin:0 
 .daftar-toolbar{ display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
 .search-input{ flex:1; min-width:160px; background: rgba(61,139,253,0.06); border:1px solid var(--glass-border); color: var(--ink); font-family: inherit; font-size:13px; padding:9px 12px; border-radius:10px; }
 .date-input{ min-width:140px; background: rgba(61,139,253,0.06); border:1px solid var(--glass-border); color: var(--ink); font-family: inherit; font-size:13px; padding:9px 10px; border-radius:10px; color-scheme: dark; }
+.kelas-select{ background: rgba(61,139,253,0.06); border:1px solid var(--glass-border); color: var(--ink); font-family: inherit; font-size:13px; padding:9px 10px; border-radius:10px; min-width:130px; }
 .daftar-summary{ font-size:12.5px; color: var(--ink-dim); margin-bottom:10px; }
 .table-wrap{ overflow-x:auto; max-height:440px; overflow-y:auto; border:1px solid var(--glass-border); border-radius:10px; }
 table{ width:100%; border-collapse:collapse; font-size:12.5px; }
@@ -154,6 +155,8 @@ th{ text-align:left; padding:10px 12px; background: rgba(61,139,253,0.08); color
 td{ padding:9px 12px; border-top:1px solid var(--line); white-space:nowrap; }
 .status-hadir{ color: var(--accent-2); font-weight:600; }
 .status-belum{ color: var(--ink-dim); }
+tbody tr{ cursor:pointer; }
+tbody tr:hover{ background: rgba(61,139,253,0.06); }
 
 /* ---------- GENERATE ---------- */
 .field-label{ display:flex; flex-direction:column; gap:6px; font-size:12.5px; color: var(--ink-dim); margin-bottom:16px; }
@@ -175,25 +178,31 @@ input[type="text"]:focus{ border-color: var(--accent); }
 @keyframes toastin{ from{ opacity:0; transform: translateX(20px);} to{ opacity:1; transform:none;} }
 @keyframes toastout{ to{ opacity:0; transform: translateX(20px);} }
 
-/* ---------- FITUR BARU ---------- */
-/* Tombol fullscreen di header */
-.page-head{ position:relative; }
+/* ---------- HEADER EXTRA ---------- */
 .head-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap; }
 .fs-btn{ background: rgba(61,139,253,0.10); border:1px solid var(--glass-border); color: var(--ink-dim); width:34px; height:34px; border-radius:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
 .fs-btn:hover{ color: var(--accent); border-color: var(--accent); }
 .fs-btn svg{ width:16px; height:16px; }
-
-/* Jam digital */
 .live-clock{ font-family: var(--font-mono); font-size:12.5px; color: var(--accent); background: rgba(61,139,253,0.10); padding:6px 12px; border-radius:8px; border:1px solid var(--glass-border); }
 
-/* Filter kelas di toolbar daftar */
-.kelas-select{ background: rgba(61,139,253,0.06); border:1px solid var(--glass-border); color: var(--ink); font-family: inherit; font-size:13px; padding:9px 10px; border-radius:10px; min-width:130px; }
-
-/* Tombol tambahan (Excel, Copy, Print) */
+/* ---------- TOMBOL EXTRA ---------- */
 .btn-extra{ background: rgba(46,197,182,0.10); border:1px solid rgba(46,197,182,0.3); color: var(--accent-2); }
 .btn-extra:hover{ border-color: var(--accent-2); }
 
-/* Modal detail mahasiswa */
+/* ---------- TOGGLE PILL ---------- */
+.toolbar-extra{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+.toggle-pill{ display:inline-flex; align-items:center; gap:6px; font-size:11.5px; color: var(--ink-dim); background: rgba(61,139,253,0.06); border:1px solid var(--glass-border); padding:6px 10px; border-radius:8px; cursor:pointer; }
+.toggle-pill input{ display:none; }
+.toggle-pill.on{ color: var(--accent); border-color: var(--accent); background: rgba(61,139,253,0.15); }
+.toggle-pill .dot{ width:6px; height:6px; border-radius:50%; background: var(--ink-dim); }
+.toggle-pill.on .dot{ background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+
+/* ---------- MANUAL INPUT ---------- */
+.manual-row{ display:flex; gap:8px; margin-bottom:14px; }
+.manual-row input{ flex:1; }
+.manual-row .btn-outline{ flex-shrink:0; padding:9px 16px; }
+
+/* ---------- MODAL ---------- */
 .modal-backdrop{ position:fixed; inset:0; background: rgba(5,15,30,0.75); backdrop-filter: blur(6px); z-index:200; display:flex; align-items:center; justify-content:center; padding:20px; }
 .modal-backdrop[hidden]{ display:none; }
 .modal{ background: var(--sidebar-bg); border:1px solid var(--glass-border); border-radius:16px; padding:26px 28px; max-width:400px; width:100%; position:relative; box-shadow: 0 30px 60px -20px rgba(0,0,0,0.7); animation: modalIn .25s ease; }
@@ -205,22 +214,110 @@ input[type="text"]:focus{ border-color: var(--accent); }
 .modal-row:last-child{ border-bottom:none; }
 .modal-row span:first-child{ color: var(--ink-dim); }
 
-/* Baris tabel clickable */
-tbody tr{ cursor:pointer; }
-tbody tr:hover{ background: rgba(61,139,253,0.06); }
+/* ---------- KALENDER KEHADIRAN ---------- */
+.cal-header{
+  display:flex; justify-content:space-between; align-items:center;
+  gap:12px; margin-bottom:16px; flex-wrap:wrap;
+}
+.cal-nav{ display:flex; align-items:center; gap:6px; }
+.cal-btn{
+  background: rgba(61,139,253,0.10);
+  border:1px solid var(--glass-border);
+  color: var(--ink-dim); width:30px; height:30px; border-radius:8px;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  transition: all .2s ease; font-family: inherit;
+}
+.cal-btn:hover{ color: var(--accent); border-color: var(--accent); background: rgba(61,139,253,0.2); }
+.cal-btn.today-btn{
+  width:auto; padding:0 12px; font-size:11.5px; font-weight:600;
+  color: var(--ink); letter-spacing:.3px;
+}
+.cal-title{
+  font-family: var(--font-display); font-size:15px; font-weight:600;
+  color: var(--ink); min-width:150px; text-align:center;
+}
 
-/* Sound/auto-refresh toggle di samping flash */
-.toolbar-extra{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
-.toggle-pill{ display:inline-flex; align-items:center; gap:6px; font-size:11.5px; color: var(--ink-dim); background: rgba(61,139,253,0.06); border:1px solid var(--glass-border); padding:6px 10px; border-radius:8px; cursor:pointer; }
-.toggle-pill input{ display:none; }
-.toggle-pill.on{ color: var(--accent); border-color: var(--accent); background: rgba(61,139,253,0.15); }
-.toggle-pill .dot{ width:6px; height:6px; border-radius:50%; background: var(--ink-dim); }
-.toggle-pill.on .dot{ background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+.cal-weekdays{
+  display:grid; grid-template-columns: repeat(7, 1fr); gap:6px;
+  margin-bottom:6px; padding: 0 2px;
+}
+.wd{
+  text-align:center; font-family: var(--font-mono); font-size:10.5px;
+  color: var(--ink-dim); text-transform:uppercase; letter-spacing:.5px;
+  padding:4px 0;
+}
+.wd-sun{ color: #ef6b6b; }
+.wd-sat{ color: #4d9fff; }
 
-/* Manual input NIM */
-.manual-row{ display:flex; gap:8px; margin-bottom:14px; }
-.manual-row input{ flex:1; }
-.manual-row .btn-outline{ flex-shrink:0; padding:9px 16px; }
+.cal-grid{
+  display:grid; grid-template-columns: repeat(7, 1fr); gap:6px;
+}
+
+.cal-day{
+  aspect-ratio: 1; border-radius:10px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  font-family: var(--font-mono); font-size:13px; font-weight:600;
+  color: var(--ink-dim); cursor:pointer; position:relative;
+  transition: all .2s ease; padding:4px; line-height:1.1;
+  border:1px solid transparent; background: rgba(61,139,253,0.04);
+}
+.cal-day .cd-num{ font-size:13px; font-weight:700; }
+.cal-day .cd-count{
+  font-size:9px; opacity:.75; margin-top:2px; letter-spacing:.3px;
+}
+.cal-day:hover{
+  transform: scale(1.05); z-index:2;
+  border-color: var(--accent);
+  box-shadow: 0 8px 20px -8px rgba(61,139,253,0.6);
+}
+
+.cal-day.other-month{
+  opacity:.28; font-size:11px; background: transparent;
+}
+.cal-day.other-month .cd-count{ display:none; }
+
+.cal-day.today{
+  border:2px solid var(--accent-2) !important;
+  box-shadow: 0 0 12px rgba(46,197,182,0.5);
+  color: var(--accent-2);
+}
+
+.cal-day.weekend .cd-num{ color: #ef6b6b; opacity:.85; }
+.cal-day.weekend.sun .cd-num{ color: #ef6b6b; }
+
+.cal-day[data-level="1"]{ background: rgba(61,139,253,0.18); color: var(--ink); }
+.cal-day[data-level="2"]{ background: rgba(61,139,253,0.38); color: #fff; }
+.cal-day[data-level="3"]{ background: rgba(61,139,253,0.60); color: #fff; }
+.cal-day[data-level="4"]{ background: var(--accent); color:#fff; }
+.cal-day[data-level="4"] .cd-num{ text-shadow: 0 1px 2px rgba(0,0,0,.3); }
+.cal-day[data-level="0"].no-data{ opacity:.55; }
+
+.cal-footer{
+  display:flex; justify-content:space-between; align-items:center;
+  margin-top:14px; padding-top:14px; border-top:1px solid var(--line);
+  flex-wrap:wrap; gap:10px;
+}
+.cal-legend{
+  display:flex; align-items:center; gap:6px;
+  font-family: var(--font-mono); font-size:10.5px; color: var(--ink-dim);
+}
+.cal-legend .legend-label{ padding:0 4px; }
+.legend-cell{
+  width:14px; height:14px; border-radius:4px;
+  background: rgba(61,139,253,0.04); display:inline-block;
+  border:1px solid var(--glass-border);
+}
+.legend-cell[data-level="0"]{ background: rgba(61,139,253,0.04); }
+.legend-cell[data-level="1"]{ background: rgba(61,139,253,0.18); }
+.legend-cell[data-level="2"]{ background: rgba(61,139,253,0.38); }
+.legend-cell[data-level="3"]{ background: rgba(61,139,253,0.60); }
+.legend-cell[data-level="4"]{ background: var(--accent); }
+
+.cal-stats{
+  font-family: var(--font-mono); font-size:11px; color: var(--ink-dim);
+  display:flex; gap:14px; flex-wrap:wrap;
+}
+.cal-stats b{ color: var(--accent); font-weight:600; }
 
 /* ---------- RESPONSIVE ---------- */
 @media (max-width: 900px){
@@ -237,6 +334,9 @@ tbody tr:hover{ background: rgba(61,139,253,0.06); }
   .mobile-nav-toggle svg{ width:18px; height:18px; }
   .main{ padding: 20px 18px 50px; }
   .stat-grid{ grid-template-columns: 1fr 1fr; }
+  .cal-title{ font-size:13px; min-width:120px; }
+  .cal-day .cd-num{ font-size:11px; }
+  .cal-day .cd-count{ font-size:8px; }
 }
 </style>
 </head>
@@ -319,7 +419,6 @@ tbody tr:hover{ background: rgba(61,139,253,0.06); }
         </div>
       </div>
 
-      <!-- BARU: Alert target kehadiran -->
       <div class="panel" id="targetAlert" hidden style="margin-bottom:18px; padding:14px 18px; border-left:3px solid var(--accent);">
         <span id="targetAlertText" style="font-size:13px;"></span>
       </div>
@@ -337,7 +436,6 @@ tbody tr:hover{ background: rgba(61,139,253,0.06); }
         </div>
       </div>
 
-      <!-- BARU: Top 5 Rajin + Perlu Perhatian -->
       <div class="panel-grid two-col" style="margin-top:18px;">
         <div class="panel">
           <h3>&#127942; Top 5 Rajin (30 Hari)</h3>
@@ -350,6 +448,48 @@ tbody tr:hover{ background: rgba(61,139,253,0.06); }
           <ul class="activity-list" id="alphaList">
             <li class="empty-row">Memuat...</li>
           </ul>
+        </div>
+      </div>
+
+      <!-- KALENDER KEHADIRAN -->
+      <div class="panel" style="margin-top:18px;">
+        <div class="cal-header">
+          <h3 style="margin:0;">&#128197; Kalender Kehadiran</h3>
+          <div class="cal-nav">
+            <button class="cal-btn" id="calPrev" title="Bulan sebelumnya">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <span class="cal-title" id="calTitle">—</span>
+            <button class="cal-btn" id="calNext" title="Bulan berikutnya">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+            <button class="cal-btn today-btn" id="calToday" title="Kembali ke hari ini">Hari ini</button>
+          </div>
+        </div>
+
+        <div class="cal-weekdays">
+          <span class="wd wd-sun">Min</span>
+          <span class="wd">Sen</span>
+          <span class="wd">Sel</span>
+          <span class="wd">Rab</span>
+          <span class="wd">Kam</span>
+          <span class="wd">Jum</span>
+          <span class="wd wd-sat">Sab</span>
+        </div>
+
+        <div class="cal-grid" id="calGrid"></div>
+
+        <div class="cal-footer">
+          <div class="cal-legend">
+            <span class="legend-label">Rendah</span>
+            <span class="legend-cell" data-level="0"></span>
+            <span class="legend-cell" data-level="1"></span>
+            <span class="legend-cell" data-level="2"></span>
+            <span class="legend-cell" data-level="3"></span>
+            <span class="legend-cell" data-level="4"></span>
+            <span class="legend-label">Tinggi</span>
+          </div>
+          <div class="cal-stats" id="calStats"></div>
         </div>
       </div>
     </section>
@@ -385,7 +525,6 @@ tbody tr:hover{ background: rgba(61,139,253,0.06); }
             </button>
           </div>
 
-          <!-- BARU: Toggle sound + auto refresh -->
           <div class="toolbar-extra">
             <label class="toggle-pill" id="soundPill">
               <input type="checkbox" id="soundToggle" checked>
@@ -397,7 +536,6 @@ tbody tr:hover{ background: rgba(61,139,253,0.06); }
             </label>
           </div>
 
-          <!-- BARU: Manual input NIM -->
           <div class="manual-row">
             <input type="text" id="manualNim" placeholder="Input manual: ketik NIM lalu Enter...">
             <button class="btn-outline" id="manualBtn">Kirim</button>
@@ -425,7 +563,6 @@ tbody tr:hover{ background: rgba(61,139,253,0.06); }
       <div class="panel">
         <div class="daftar-toolbar">
           <input type="text" id="searchInput" class="search-input" placeholder="Cari nama atau NIM...">
-          <!-- BARU: Filter kelas -->
           <select id="kelasFilter" class="kelas-select">
             <option value="">Semua Kelas</option>
           </select>
@@ -434,7 +571,6 @@ tbody tr:hover{ background: rgba(61,139,253,0.06); }
         </div>
         <div class="daftar-toolbar">
           <button class="btn-outline" id="exportBtn">Ekspor CSV</button>
-          <!-- BARU: Tombol tambahan -->
           <button class="btn-outline btn-extra" id="copyBtn">Copy</button>
           <button class="btn-outline btn-extra" id="printBtn">Cetak</button>
         </div>
@@ -485,7 +621,7 @@ tbody tr:hover{ background: rgba(61,139,253,0.06); }
   </main>
 </div>
 
-<!-- BARU: Modal detail mahasiswa -->
+<!-- Modal Detail -->
 <div class="modal-backdrop" id="modalBackdrop" hidden>
   <div class="modal">
     <button class="modal-close" id="modalClose">&#10005;</button>
@@ -508,11 +644,22 @@ const CACHE_LOG_PREFIX = "presensi_cache_log_";
 let mahasiswaList = [];
 let currentDateStr = todayStr();
 let todayLogMap = {};
+let currentLogMap = {};
 let autoRefreshTimer = null;
 
 function todayStr(){
   const d = new Date();
   return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+
+function dateOffset(days){
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+
+function formatDateKey(y, m, d){
+  return y + "-" + String(m+1).padStart(2,"0") + "-" + String(d).padStart(2,"0");
 }
 
 /* ===================== TOAST ===================== */
@@ -540,7 +687,7 @@ function playBeep(){
   }catch(e){}
 }
 
-/* ===================== LIVE CLOCK (BARU) ===================== */
+/* ===================== LIVE CLOCK ===================== */
 function tickClock(){
   const el = document.getElementById("liveClock");
   if (!el) return;
@@ -550,7 +697,7 @@ function tickClock(){
 tickClock();
 setInterval(tickClock, 1000);
 
-/* ===================== FULLSCREEN (BARU) ===================== */
+/* ===================== FULLSCREEN ===================== */
 document.getElementById("fsBtn").addEventListener("click", () => {
   if (!document.fullscreenElement){
     document.documentElement.requestFullscreen().catch(() => {});
@@ -660,7 +807,6 @@ async function loadBeranda(){
   document.getElementById("statBelum").textContent = belum;
   document.getElementById("statPersen").textContent = persen + "%";
 
-  // BARU: Alert target kehadiran
   const targetEl = document.getElementById("targetAlert");
   const targetText = document.getElementById("targetAlertText");
   if (total > 0){
@@ -680,7 +826,8 @@ async function loadBeranda(){
   renderActivity(document.getElementById("scanActivityList"));
 
   loadWeeklyChart();
-  loadRankings(); // BARU
+  loadRankings();
+  loadHeatmap();
 }
 
 function renderActivity(el){
@@ -719,13 +866,7 @@ async function loadWeeklyChart(){
   }
 }
 
-/* ===================== BARU: Ranking Top 5 & Alpha ===================== */
-function dateOffset(days){
-  const d = new Date();
-  d.setDate(d.getDate() + days);
-  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
-}
-
+/* ===================== RANKING TOP 5 & ALPHA ===================== */
 async function loadRankings(){
   const rankList = document.getElementById("rankList");
   const alphaList = document.getElementById("alphaList");
@@ -764,6 +905,189 @@ async function loadRankings(){
   `).join("");
 }
 
+/* ===================== KALENDER KEHADIRAN ===================== */
+let calYear, calMonth;
+const calNow = new Date();
+calYear = calNow.getFullYear();
+calMonth = calNow.getMonth();
+
+async function loadHeatmap(){
+  const grid = document.getElementById("calGrid");
+  const titleEl = document.getElementById("calTitle");
+  const statsEl = document.getElementById("calStats");
+  if (!grid) return;
+
+  const totalMhs = Math.max(1, mahasiswaList.length);
+  const todayKey = todayStr();
+
+  const monthNames = ["Januari","Februari","Maret","April","Mei","Juni",
+                      "Juli","Agustus","September","Oktober","November","Desember"];
+  titleEl.textContent = `${monthNames[calMonth]} ${calYear}`;
+
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const daysInPrev = new Date(calYear, calMonth, 0).getDate();
+
+  const cells = [];
+  let totalHadirBulan = 0;
+  let hariAktif = 0;
+  let hariTerbaik = { tgl: null, count: 0 };
+
+  // Sisa hari dari bulan sebelumnya
+  for (let i = firstDay - 1; i >= 0; i--){
+    const d = daysInPrev - i;
+    const prevDate = new Date(calYear, calMonth - 1, d);
+    cells.push(renderCalDay(prevDate, true, totalMhs, todayKey));
+  }
+
+  // Hari-hari di bulan ini
+  for (let d = 1; d <= daysInMonth; d++){
+    const dateObj = new Date(calYear, calMonth, d);
+    const key = formatDateKey(calYear, calMonth, d);
+    const isFuture = key > todayKey;
+    const cached = localStorage.getItem(CACHE_LOG_PREFIX + key);
+    const logMap = cached ? JSON.parse(cached) : {};
+    const count = Object.keys(logMap).length;
+    const pct = count / totalMhs;
+
+    if (count > 0){
+      totalHadirBulan += count;
+      hariAktif++;
+      if (count > hariTerbaik.count){
+        hariTerbaik = { tgl: d, count: count };
+      }
+    }
+
+    let level = 0;
+    if (count > 0) level = 1;
+    if (pct > 0.25) level = 2;
+    if (pct > 0.5) level = 3;
+    if (pct > 0.75) level = 4;
+
+    const isToday = key === todayKey;
+    const dayOfWeek = dateObj.getDay();
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+
+    const tooltip = `${dateObj.toLocaleDateString("id-ID", { weekday:"long", day:"numeric", month:"long", year:"numeric" })} — ${count > 0 ? count + " hadir" : (isFuture ? "belum berlangsung" : "tidak ada data")}`;
+
+    cells.push(`
+      <div class="cal-day ${isToday ? 'today' : ''} ${isWeekend ? 'weekend ' + (dayOfWeek === 0 ? 'sun' : '') : ''} ${count === 0 && !isFuture ? 'no-data' : ''}"
+           data-level="${level}"
+           data-date="${key}"
+           title="${tooltip}">
+        <span class="cd-num">${d}</span>
+        ${count > 0 ? `<span class="cd-count">${count}</span>` : ''}
+      </div>
+    `);
+  }
+
+  // Hari dari bulan berikutnya (sampai grid penuh)
+  const totalCells = cells.length;
+  const remaining = (7 - (totalCells % 7)) % 7;
+  for (let d = 1; d <= remaining; d++){
+    const nextDate = new Date(calYear, calMonth + 1, d);
+    cells.push(renderCalDay(nextDate, true, totalMhs, todayKey));
+  }
+
+  grid.innerHTML = cells.join("");
+
+  if (statsEl){
+    statsEl.innerHTML = `
+      <span>Total hadir: <b>${totalHadirBulan}</b></span>
+      <span>Hari aktif: <b>${hariAktif}</b></span>
+      ${hariTerbaik.tgl ? `<span>Terbaik: <b>${hariTerbaik.tgl} ${monthNames[calMonth].slice(0,3)}</b> (${hariTerbaik.count})</span>` : ""}
+    `;
+  }
+
+  grid.querySelectorAll(".cal-day[data-date]").forEach(el => {
+    el.addEventListener("click", () => showDayDetail(el.dataset.date));
+  });
+}
+
+function renderCalDay(dateObj, isOtherMonth, totalMhs, todayKey){
+  const d = dateObj.getDate();
+  const m = dateObj.getMonth();
+  const y = dateObj.getFullYear();
+  const key = formatDateKey(y, m, d);
+
+  const cached = localStorage.getItem(CACHE_LOG_PREFIX + key);
+  const logMap = cached ? JSON.parse(cached) : {};
+  const count = Object.keys(logMap).length;
+  const pct = count / totalMhs;
+
+  let level = 0;
+  if (count > 0) level = 1;
+  if (pct > 0.25) level = 2;
+  if (pct > 0.5) level = 3;
+  if (pct > 0.75) level = 4;
+
+  const isToday = key === todayKey;
+  const dayOfWeek = dateObj.getDay();
+  const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+
+  return `
+    <div class="cal-day other-month ${isToday ? 'today' : ''} ${isWeekend ? 'weekend ' + (dayOfWeek === 0 ? 'sun' : '') : ''}"
+         data-level="${isOtherMonth ? 0 : level}"
+         data-date="${key}"
+         title="${dateObj.toLocaleDateString("id-ID", { weekday:"long", day:"numeric", month:"long", year:"numeric" })}">
+      <span class="cd-num">${d}</span>
+    </div>
+  `;
+}
+
+document.getElementById("calPrev")?.addEventListener("click", () => {
+  calMonth--;
+  if (calMonth < 0){ calMonth = 11; calYear--; }
+  loadHeatmap();
+});
+
+document.getElementById("calNext")?.addEventListener("click", () => {
+  calMonth++;
+  if (calMonth > 11){ calMonth = 0; calYear++; }
+  loadHeatmap();
+});
+
+document.getElementById("calToday")?.addEventListener("click", () => {
+  const now = new Date();
+  calYear = now.getFullYear();
+  calMonth = now.getMonth();
+  loadHeatmap();
+});
+
+/* ===================== MODAL DETAIL 1 HARI ===================== */
+function showDayDetail(tgl){
+  const cached = localStorage.getItem(CACHE_LOG_PREFIX + tgl);
+  const logMap = cached ? JSON.parse(cached) : {};
+  const entries = Object.values(logMap);
+
+  const d = new Date(tgl + "T00:00:00");
+  const title = d.toLocaleDateString("id-ID", { weekday:"long", day:"numeric", month:"long", year:"numeric" });
+
+  modalTitle.textContent = title;
+
+  if (entries.length === 0){
+    modalBody.innerHTML = `<p style="font-size:13px; color: var(--ink-dim); text-align:center; padding:20px 0;">Tidak ada data presensi pada tanggal ini.</p>`;
+  } else {
+    modalBody.innerHTML = `
+      <div class="modal-row" style="border-bottom:1px solid var(--line); padding-bottom:12px; margin-bottom:8px;">
+        <span>Total Hadir</span>
+        <span style="color: var(--accent-2); font-weight:600;">${entries.length} mahasiswa</span>
+      </div>
+      <div style="max-height:280px; overflow-y:auto; margin-top:4px;">
+        ${entries
+          .sort((a,b) => (a.waktu||"").localeCompare(b.waktu||""))
+          .map((e, i) => `
+            <div class="modal-row" style="padding:6px 0; font-size:12.5px;">
+              <span>${i+1}. ${e.nama}</span>
+              <span style="font-family: var(--font-mono); color: var(--ink-dim); font-size:11px;">${e.waktu || "-"}</span>
+            </div>
+          `).join("")}
+      </div>
+    `;
+  }
+  modalBackdrop.hidden = false;
+}
+
 /* ===================== DAFTAR & REKAP ===================== */
 const tabelBody = document.getElementById("tabelBody");
 const daftarSummary = document.getElementById("daftarSummary");
@@ -771,7 +1095,6 @@ const tanggalPicker = document.getElementById("tanggalPicker");
 const searchInput = document.getElementById("searchInput");
 const kelasFilter = document.getElementById("kelasFilter");
 tanggalPicker.value = currentDateStr;
-let currentLogMap = {};
 
 async function loadDaftar(){
   currentDateStr = tanggalPicker.value || todayStr();
@@ -779,7 +1102,6 @@ async function loadDaftar(){
 
   await getMahasiswa();
 
-  // BARU: Populate filter kelas
   const kelasSet = new Set(mahasiswaList.map(m => m.kelas).filter(Boolean));
   const currentVal = kelasFilter.value;
   kelasFilter.innerHTML = '<option value="">Semua Kelas</option>' +
@@ -818,7 +1140,6 @@ function renderTabel(){
   }).join("") || `<tr><td colspan="5" class="empty-row">Tidak ada hasil untuk pencarian ini.</td></tr>`;
   daftarSummary.textContent = `${hadirCount} / ${mahasiswaList.length} hadir pada ${currentDateStr}`;
 
-  // BARU: Klik baris buka modal detail
   tabelBody.querySelectorAll("tr[data-nim]").forEach(tr => {
     tr.addEventListener("click", () => bukaModal(tr.dataset.nim));
   });
@@ -846,7 +1167,7 @@ document.getElementById("exportBtn").addEventListener("click", () => {
   showToast("Rekap berhasil diekspor ke CSV");
 });
 
-/* ===================== BARU: Copy ke Clipboard ===================== */
+/* ===================== COPY KE CLIPBOARD ===================== */
 document.getElementById("copyBtn").addEventListener("click", () => {
   const rows = [];
   tabelBody.querySelectorAll("tr").forEach(tr => {
@@ -857,7 +1178,7 @@ document.getElementById("copyBtn").addEventListener("click", () => {
   navigator.clipboard.writeText(tsv).then(() => showToast("Rekap disalin ke clipboard"));
 });
 
-/* ===================== BARU: Cetak Rekap ===================== */
+/* ===================== CETAK REKAP ===================== */
 document.getElementById("printBtn").addEventListener("click", () => {
   const rows = [["NIM", "Nama", "Kelas", "Status", "Waktu"]];
   tabelBody.querySelectorAll("tr").forEach(tr => {
@@ -885,7 +1206,7 @@ document.getElementById("printBtn").addEventListener("click", () => {
   setTimeout(() => win.print(), 500);
 });
 
-/* ===================== BARU: Modal Detail Mahasiswa ===================== */
+/* ===================== MODAL DETAIL MAHASISWA ===================== */
 const modalBackdrop = document.getElementById("modalBackdrop");
 const modalBody = document.getElementById("modalBody");
 const modalTitle = document.getElementById("modalTitle");
@@ -895,7 +1216,6 @@ async function bukaModal(nim){
   if (!mhs) return;
   modalTitle.textContent = mhs.nama;
 
-  // Hitung kehadiran 30 hari dari cache
   let hadir = 0, total = 0;
   for (let i = 29; i >= 0; i--){
     const tgl = dateOffset(-i);
@@ -922,7 +1242,7 @@ modalBackdrop.addEventListener("click", (e) => {
   if (e.target === modalBackdrop) modalBackdrop.hidden = true;
 });
 
-/* ===================== SCAN QR (KAMERA) ===================== */
+/* ===================== SCAN QR ===================== */
 let html5QrCode = null;
 let scanning = false;
 let processing = false;
@@ -1023,7 +1343,7 @@ flashBtn.addEventListener("click", async () => {
   }catch(e){}
 });
 
-/* ===================== BARU: Manual Input NIM ===================== */
+/* ===================== MANUAL INPUT NIM ===================== */
 const manualNim = document.getElementById("manualNim");
 const manualBtn = document.getElementById("manualBtn");
 async function submitManual(){
@@ -1035,7 +1355,7 @@ async function submitManual(){
 manualBtn.addEventListener("click", submitManual);
 manualNim.addEventListener("keydown", (e) => { if (e.key === "Enter") submitManual(); });
 
-/* ===================== BARU: Sound & Auto-refresh Toggle ===================== */
+/* ===================== SOUND & AUTO-REFRESH TOGGLE ===================== */
 const soundToggle = document.getElementById("soundToggle");
 const soundPill = document.getElementById("soundPill");
 soundToggle.addEventListener("change", () => {
