@@ -174,7 +174,7 @@ input[type="text"]:focus{ border-color: var(--accent); }
 
 /* ---------- TOAST ---------- */
 .toast-container{ position:fixed; bottom:20px; right:20px; z-index:100; display:flex; flex-direction:column; gap:8px; }
-.toast{ background: rgba(13,33,55,0.96); border:1px solid var(--glass-border); color: var(--ink); padding:11px 16px; border-radius:10px; font-size:12.5px; max-width:260px; box-shadow: 0 14px 30px -10px rgba(0,0,0,0.5); animation: toastin .25s ease; border-left:3px solid var(--accent); }
+.toast{ background: rgba(13,33,55,0.96); border:1px solid var(--glass-border); color: var(--ink); padding:11px 16px; border-radius:10px; font-size:12.5px; max-width:360px; box-shadow: 0 14px 30px -10px rgba(0,0,0,0.5); animation: toastin .25s ease; border-left:3px solid var(--accent); }
 .toast.out{ animation: toastout .3s ease forwards; }
 @keyframes toastin{ from{ opacity:0; transform: translateX(20px);} to{ opacity:1; transform:none;} }
 @keyframes toastout{ to{ opacity:0; transform: translateX(20px);} }
@@ -586,7 +586,7 @@ input[type="text"]:focus{ border-color: var(--accent); }
         </div>
       </div>
 
-      <!-- Grafik Perbandingan Kelas -->
+      <!-- Perbandingan Kelas -->
       <div class="panel" style="margin-top:18px;">
         <h3>📊 Perbandingan Kehadiran Per Kelas (Bulan Ini)</h3>
         <div class="kelas-compare" id="kelasCompare">
@@ -594,7 +594,7 @@ input[type="text"]:focus{ border-color: var(--accent); }
         </div>
       </div>
 
-      <!-- Mahasiswa Belum Hadir Hari Ini -->
+      <!-- Belum Hadir Hari Ini -->
       <div class="panel" style="margin-top:18px;">
         <div class="panel-head-row">
           <h3>📢 Belum Hadir Hari Ini</h3>
@@ -763,7 +763,7 @@ input[type="text"]:focus{ border-color: var(--accent); }
 
 <script>
 /* =====================================================================
-   URL APPS SCRIPT ANDA — SUDAH DIISI, JANGAN DIUBAH
+   URL APPS SCRIPT ANDA
    ===================================================================== */
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxZNo7kk92IlMgi74FjdbehSIayU7BJ00vzy92HcpaXRh3VOxh7xNvAFAS1JItUpKU/exec";
 
@@ -798,7 +798,7 @@ function showToast(message){
   toast.className = "toast";
   toast.textContent = message;
   container.appendChild(toast);
-  setTimeout(() => { toast.classList.add("out"); setTimeout(() => toast.remove(), 300); }, 3200);
+  setTimeout(() => { toast.classList.add("out"); setTimeout(() => toast.remove(), 300); }, 4000);
 }
 
 function playBeep(){
@@ -872,6 +872,7 @@ navItems.forEach(btn => {
     document.getElementById("sidebarEl")?.classList.remove("open");
     if (btn.dataset.page === "beranda") loadBeranda();
     if (btn.dataset.page === "mahasiswa") loadDaftar();
+    if (btn.dataset.page === "generate") refreshMahasiswaCache();
   });
 });
 
@@ -900,7 +901,25 @@ async function cekKoneksi(){
   }
 }
 
-/* ===================== AMBIL DAFTAR MAHASISWA ===================== */
+/* ===================== AMBIL DATA ===================== */
+// Fungsi baru: paksa ambil data fresh dari server (untuk halaman Generate QR)
+async function refreshMahasiswaCache(){
+  try{
+    const res = await fetch(APPS_SCRIPT_URL + "?action=mahasiswa");
+    const data = await res.json();
+    if (data.success && data.data){
+      mahasiswaList = data.data;
+      localStorage.setItem(CACHE_MHS_KEY, JSON.stringify(mahasiswaList));
+      console.log("[Presensi] Data mahasiswa di-refresh:", mahasiswaList.length, "orang");
+    }
+  }catch(e){
+    console.warn("[Presensi] Gagal refresh data:", e);
+    // Fallback ke cache
+    const cached = localStorage.getItem(CACHE_MHS_KEY);
+    mahasiswaList = cached ? JSON.parse(cached) : [];
+  }
+}
+
 async function getMahasiswa(){
   const online = await cekKoneksi();
   if (online){
@@ -1017,7 +1036,7 @@ async function loadWeeklyChart(){
   }
 }
 
-/* ===================== RANKING TOP 5 & ALPHA ===================== */
+/* ===================== RANKING ===================== */
 async function loadRankings(){
   const rankList = document.getElementById("rankList");
   const alphaList = document.getElementById("alphaList");
@@ -1056,7 +1075,7 @@ async function loadRankings(){
   `).join("");
 }
 
-/* ===================== KALENDER KEHADIRAN ===================== */
+/* ===================== KALENDER ===================== */
 let calYear, calMonth;
 const calNow = new Date();
 calYear = calNow.getFullYear();
@@ -1223,7 +1242,6 @@ function renderCalDay(dateObj, isOtherMonth, totalMhs, todayKey){
   `;
 }
 
-/* ===================== NAVIGASI KALENDER ===================== */
 document.getElementById("calPrev")?.addEventListener("click", () => {
   calMonth--;
   if (calMonth < 0){ calMonth = 11; calYear--; }
@@ -1287,7 +1305,7 @@ function showDayDetail(tgl){
   modalBackdrop.hidden = false;
 }
 
-/* ===================== DAFTAR & REKAP ===================== */
+/* ===================== DAFTAR ===================== */
 const tabelBody = document.getElementById("tabelBody");
 const daftarSummary = document.getElementById("daftarSummary");
 const tanggalPicker = document.getElementById("tanggalPicker");
@@ -1349,7 +1367,7 @@ tanggalPicker.addEventListener("change", loadDaftar);
 searchInput.addEventListener("input", renderTabel);
 kelasFilter.addEventListener("change", renderTabel);
 
-/* ===================== EKSPOR CSV ===================== */
+/* ===================== EKSPOR ===================== */
 document.getElementById("exportBtn").addEventListener("click", () => {
   const rows = [["NIM", "Nama", "Kelas", "Status", "Waktu"]];
   tabelBody.querySelectorAll("tr").forEach(tr => {
@@ -1366,7 +1384,6 @@ document.getElementById("exportBtn").addEventListener("click", () => {
   showToast("Rekap berhasil diekspor ke CSV");
 });
 
-/* ===================== COPY KE CLIPBOARD ===================== */
 document.getElementById("copyBtn").addEventListener("click", () => {
   const rows = [];
   tabelBody.querySelectorAll("tr").forEach(tr => {
@@ -1377,7 +1394,6 @@ document.getElementById("copyBtn").addEventListener("click", () => {
   navigator.clipboard.writeText(tsv).then(() => showToast("Rekap disalin ke clipboard"));
 });
 
-/* ===================== CETAK REKAP ===================== */
 document.getElementById("printBtn").addEventListener("click", () => {
   const rows = [["NIM", "Nama", "Kelas", "Status", "Waktu"]];
   tabelBody.querySelectorAll("tr").forEach(tr => {
@@ -1539,7 +1555,7 @@ flashBtn.addEventListener("click", async () => {
   }catch(e){}
 });
 
-/* ===================== UPLOAD QR DARI GALERI ===================== */
+/* ===================== UPLOAD QR ===================== */
 document.getElementById("uploadQrBtn")?.addEventListener("click", () => {
   document.getElementById("uploadQrInput").click();
 });
@@ -1557,7 +1573,7 @@ document.getElementById("uploadQrInput")?.addEventListener("change", async (e) =
   e.target.value = "";
 });
 
-/* ===================== MANUAL INPUT NIM ===================== */
+/* ===================== MANUAL INPUT ===================== */
 const manualNim = document.getElementById("manualNim");
 const manualBtn = document.getElementById("manualBtn");
 async function submitManual(){
@@ -1569,7 +1585,7 @@ async function submitManual(){
 manualBtn.addEventListener("click", submitManual);
 manualNim.addEventListener("keydown", (e) => { if (e.key === "Enter") submitManual(); });
 
-/* ===================== SOUND & AUTO-REFRESH TOGGLE ===================== */
+/* ===================== TOGGLE ===================== */
 const soundToggle = document.getElementById("soundToggle");
 const soundPill = document.getElementById("soundPill");
 soundToggle.addEventListener("change", () => {
@@ -1654,7 +1670,7 @@ async function loadKelasCompare(){
   }).join("");
 }
 
-/* ===================== BELUM HADIR HARI INI ===================== */
+/* ===================== BELUM HADIR ===================== */
 function renderBelumHadir(){
   const el = document.getElementById("belumList");
   if (!el) return;
@@ -1762,7 +1778,7 @@ document.addEventListener("click", (e) => {
   }
 });
 
-/* ===================== GENERATE QR SATUAN ===================== */
+/* ===================== GENERATE QR SATUAN (FIXED) ===================== */
 const genBtn = document.getElementById("genBtn");
 const genResult = document.getElementById("genResult");
 const qrOutput = document.getElementById("qrOutput");
@@ -1770,11 +1786,48 @@ const genInfo = document.getElementById("genInfo");
 const downloadQrBtn = document.getElementById("downloadQrBtn");
 
 genBtn.addEventListener("click", async () => {
-  const nim = document.getElementById("genNim").value.trim();
-  if (!nim) return;
-  await getMahasiswa();
-  const mhs = mahasiswaList.find(m => m.nim === nim);
-  if (!mhs){ showToast(`NIM ${nim} tidak ditemukan`); return; }
+  const nimInput = document.getElementById("genNim").value.trim();
+  if (!nimInput){ showToast("Masukkan NIM dulu"); return; }
+
+  console.log("[Presensi] Mencari NIM:", nimInput, "tipe:", typeof nimInput);
+  console.log("[Presensi] Data mahasiswa tersedia:", mahasiswaList.length);
+
+  // Kalau data kosong, coba fetch ulang
+  if (mahasiswaList.length === 0){
+    console.log("[Presensi] Data kosong, fetch ulang...");
+    await getMahasiswa();
+  }
+
+  // Kalau MASIH kosong, coba fetch langsung tanpa cache
+  if (mahasiswaList.length === 0){
+    console.log("[Presensi] Masih kosong, fetch langsung...");
+    try{
+      const res = await fetch(APPS_SCRIPT_URL + "?action=mahasiswa");
+      const data = await res.json();
+      if (data.success && data.data){
+        mahasiswaList = data.data;
+        localStorage.setItem(CACHE_MHS_KEY, JSON.stringify(mahasiswaList));
+      }
+    }catch(e){ console.error("[Presensi] Error:", e); }
+  }
+
+  if (mahasiswaList.length === 0){
+    showToast("Gagal memuat data mahasiswa. Coba refresh halaman.");
+    return;
+  }
+
+  // Bandingkan NIM sebagai string, trim, dan lowercase untuk keamanan
+  const nimCari = String(nimInput).trim();
+  const mhs = mahasiswaList.find(m => String(m.nim).trim() === nimCari);
+
+  if (!mhs){
+    const daftarNim = mahasiswaList.map(m => String(m.nim).trim()).join(", ");
+    console.warn("[Presensi] NIM tidak ditemukan. Daftar NIM:", daftarNim);
+    showToast(`NIM "${nimCari}" tidak ada. Yang tersedia: ${daftarNim}`);
+    return;
+  }
+
+  console.log("[Presensi] Ditemukan:", mhs);
 
   const usePublic = document.getElementById("usePublicLink")?.checked;
   const payload = JSON.stringify({ nim: mhs.nim, nama: mhs.nama, kelas: mhs.kelas, jurusan: mhs.jurusan });
@@ -1790,15 +1843,18 @@ genBtn.addEventListener("click", async () => {
   qrOutput.src = qrUrl;
   genInfo.textContent = `${mhs.nama} — ${mhs.kelas}${usePublic ? " (Publik)" : ""}`;
   downloadQrBtn.href = qrUrl;
-  downloadQrBtn.download = `qr-${nim}.png`;
+  downloadQrBtn.download = `qr-${mhs.nim}.png`;
   genResult.hidden = false;
+  showToast(`QR berhasil dibuat untuk ${mhs.nama}`);
 });
 
 /* ===================== GENERATE QR SEMUA ===================== */
 const genAllBtn = document.getElementById("genAllBtn");
 const qrGrid = document.getElementById("qrGrid");
 genAllBtn.addEventListener("click", async () => {
-  await getMahasiswa();
+  // Force refresh data dulu
+  await refreshMahasiswaCache();
+
   if (mahasiswaList.length === 0){ showToast("Belum ada data mahasiswa"); return; }
   qrGrid.innerHTML = mahasiswaList.map(m => {
     const payload = JSON.stringify({ nim: m.nim, nama: m.nama, kelas: m.kelas, jurusan: m.jurusan });
