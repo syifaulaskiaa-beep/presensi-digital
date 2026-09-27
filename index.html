@@ -586,7 +586,7 @@ input[type="text"]:focus{ border-color: var(--accent); }
         </div>
       </div>
 
-      <!-- FITUR BARU: Grafik Perbandingan Kelas -->
+      <!-- Grafik Perbandingan Kelas -->
       <div class="panel" style="margin-top:18px;">
         <h3>📊 Perbandingan Kehadiran Per Kelas (Bulan Ini)</h3>
         <div class="kelas-compare" id="kelasCompare">
@@ -594,7 +594,7 @@ input[type="text"]:focus{ border-color: var(--accent); }
         </div>
       </div>
 
-      <!-- FITUR BARU: Mahasiswa Belum Hadir Hari Ini -->
+      <!-- Mahasiswa Belum Hadir Hari Ini -->
       <div class="panel" style="margin-top:18px;">
         <div class="panel-head-row">
           <h3>📢 Belum Hadir Hari Ini</h3>
@@ -637,7 +637,6 @@ input[type="text"]:focus{ border-color: var(--accent); }
             </button>
           </div>
 
-          <!-- FITUR BARU: Upload QR + Beep tone -->
           <div class="toolbar-extra">
             <button class="btn-outline" id="uploadQrBtn" style="font-size:11px;">
               📸 Upload QR dari Galeri
@@ -764,9 +763,9 @@ input[type="text"]:focus{ border-color: var(--accent); }
 
 <script>
 /* =====================================================================
-   GANTI URL DI BAWAH INI dengan URL Web App dari Google Apps Script
+   URL APPS SCRIPT ANDA — SUDAH DIISI, JANGAN DIUBAH
    ===================================================================== */
-const APPS_SCRIPT_URL = "GANTI_DENGAN_URL_WEB_APP_KAMU";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxZNo7kk92IlMgi74FjdbehSIayU7BJ00vzy92HcpaXRh3VOxh7xNvAFAS1JItUpKU/exec";
 
 const CACHE_MHS_KEY = "presensi_cache_mahasiswa";
 const CACHE_LOG_PREFIX = "presensi_cache_log_";
@@ -885,11 +884,6 @@ mobileToggle.addEventListener("click", () => sidebarEl.classList.toggle("open"))
 const connDot = document.getElementById("connDot");
 const connLabel = document.getElementById("connLabel");
 async function cekKoneksi(){
-  if (APPS_SCRIPT_URL.includes("GANTI_DENGAN")){
-    connDot.className = "conn-dot offline";
-    connLabel.textContent = "Belum diatur — isi APPS_SCRIPT_URL";
-    return false;
-  }
   try{
     const res = await fetch(APPS_SCRIPT_URL + "?action=ping");
     const data = await res.json();
@@ -1479,10 +1473,6 @@ async function onScanSuccess(decodedText){
 }
 
 async function kirimPresensi(nim){
-  if (APPS_SCRIPT_URL.includes("GANTI_DENGAN")){
-    setScanResult("error", "Isi dulu APPS_SCRIPT_URL di script.");
-    return;
-  }
   try{
     const res = await fetch(`${APPS_SCRIPT_URL}?action=scan&nim=${encodeURIComponent(nim)}&tanggal=${todayStr()}`);
     const data = await res.json();
